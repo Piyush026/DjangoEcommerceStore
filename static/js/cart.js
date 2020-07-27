@@ -8,18 +8,38 @@ for (var i = 0; i < updateBtns.length; i++) {
 
     console.log("User",user);
     if (user ==='AnonymousUser') {
-      console.log("user in not authenticated");
+      addcookieItem(productId,action)
     }else {
         updateUserOrder(productId, action)
         // console.log("user in authenticated");
     }
-
   })
 }
 
+function addcookieItem(productId,action) {
+  console.log("Not Logged In....");
+  if (action == 'add') {
+    if (cart[productId]== undefined) {
+      cart[productId] = {'quantity':1}
+    }
+    else {
+      cart[productId]['quantity']+= 1
+    }
+  }
+  if (action == 'remove') {
+    cart[productId]['quantity'] -= 1
+    if (cart[productId]['quantity'] <= 0) {
+      console.log('Remove Item');
+      delete cart[productId]
+    }
+  }
+  console.log('Cart:',cart);
+  document.cookie = 'cart=' +JSON.stringify(cart) +';domain=;path=/'
+  location.reload()
+}
 
 function updateUserOrder(productId,action) {
-    console.log("user is logged in");
+    console.log("user is logged in",csrftoken);
      var url = '/update_item/'
 
      fetch(url,{
@@ -35,6 +55,6 @@ function updateUserOrder(productId,action) {
      })
      .then((data)=>{
        console.log("data:",data);
-//       location.reload()
+       location.reload()
      })
 }
