@@ -5,7 +5,7 @@ from .models import *
 def cookieCart(request):
     try:
         cart = json.loads(request.COOKIES['cart'])
-        print('cart:', cart)
+        print('cart:kkkk', cart)
     except:
         cart = {}
     items = []
@@ -41,7 +41,7 @@ def cookieCart(request):
 def cartData(request):
     if request.user.is_authenticated:
         customer = request.user.customer
-        print(f'customer{customer}')
+        print(f'customer {customer}')
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         print(f'order{order}')
         items = order.orderitem_set.all()
@@ -53,3 +53,28 @@ def cartData(request):
         order = cookidata['order']
         items = cookidata['items']
     return {'items': items, 'order': order, 'cartItems': cartItems}
+
+
+def guestOrder(request, data):
+    print(f'cookies{request.COOKIES}')
+    name = data['form']['name']
+    email = data['form']['email']
+
+    cookieData = cookieCart(request)
+    items = cookieData['items']
+
+    customer, created = Customer.objects.get_or_create(email=email)
+    customer.name = name
+    customer.save()
+    order = Order.objects.create(
+        customer=customer,
+        complete=False
+    )
+    for item in items:
+        product = Product.objects.get(id=item['product']['id'])
+        orderItem = OrderItem.objects.create(
+            product=product,
+            order=order,
+            quantity=item['quantity']
+        )
+    return customer, order
